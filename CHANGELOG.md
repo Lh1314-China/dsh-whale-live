@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.2 — 2026-11-12
+
+### Added
+- **Real-time watching.** `whale_live action=watch` starts a 4-second danmaku poll; when new messages arrive the plugin calls the Agent's `followup()` to wake the model, so it can answer while the stream is live. `watch step=stop` (or closing the session) stops it.
+- The plugin now captures the calling Agent from tool execution so it can be woken later.
+
+### Notes
+- If `followup` is unavailable in a future DSH version, the plugin falls back to `inject` (context only, no wake) instead of failing the loop.
 ## 0.2.1 — 2026-11-11
 
 ### Fixed
