@@ -15,6 +15,7 @@ import { createStore } from './lib/store.js';
 import { createDanmaku } from './lib/bili.js';
 import { createVoice } from './lib/voice.js';
 import { createAvatar } from './lib/avatar.js';
+import { createVts } from './lib/vts.js';
 import { createStage } from './lib/stage.js';
 import { diagnose } from './lib/diagnostics.js';
 import { createTools } from './lib/tools.js';
@@ -53,9 +54,10 @@ export async function apply(ctx, config = {}) {
   store.ensure();
   const danmaku = createDanmaku(settings, ctx.logger);
   const avatar = createAvatar(settings, ctx.logger);
+  const vts = createVts(settings, ctx.logger);
   const stage = createStage(settings, avatar, ctx.logger);
   const voice = createVoice(settings, store, ctx.logger, avatar);
-  const tools = createTools({ ctx, store, danmaku, voice, avatar, stage, diagnose, config: settings });
+  const tools = createTools({ ctx, store, danmaku, voice, avatar, vts, stage, diagnose, config: settings });
 
   ctx.effect(() => {
     const disposers = [];

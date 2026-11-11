@@ -1,6 +1,6 @@
 {
     "name":  "dsh-whale-live",
-    "version":  "0.2.0",
+    "version":  "0.2.1",
     "description":  "Left-sidebar live console for DeepSeek Harness: persona script, stream log, Bilibili danmaku, edge-tts speech, optional VTube Studio/OBS/直播姬 launch helpers and a memory inbox. Windows only.",
     "type":  "module",
     "main":  "./index.js",
@@ -21,7 +21,8 @@
                   "locale/*.json",
                   "icon.svg",
                   "README.md",
-                  "LICENSE"
+                  "LICENSE",
+                  "CHANGELOG.md"
               ],
     "dsh":  {
                 "manifestVersion":  1,

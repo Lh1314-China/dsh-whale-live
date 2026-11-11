@@ -195,11 +195,24 @@ def main():
 
     mouth = None
     if args.vts_dir:
+        # miniaudio 在 Windows 上打不开含中文的路径（error -7），
+        # 解码前先复制到英文临时文件，播放也用这份。
+        import shutil
+        import tempfile
+
+        ascii_path = os.path.join(tempfile.gettempdir(), "dsh-whale-say-%d.mp3" % os.getpid())
+        try:
+            shutil.copyfile(path, ascii_path)
+            probe_path = ascii_path
+        except Exception:
+            probe_path = path
         mouth = Mouth(args.vts_dir)
         if mouth.vts is not None:
-            if not mouth.load(path):
+            if not mouth.load(probe_path):
                 print("[vts] 包络算不出来，只出声：%s" % mouth.error, file=sys.stderr)
                 mouth = None
+            else:
+                path = probe_path
         else:
             print("[vts] 皮套没连上，只出声：%s" % mouth.error, file=sys.stderr)
             mouth = None
