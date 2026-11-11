@@ -1,0 +1,76 @@
+{
+  "name": "dsh-whale-live",
+  "version": "0.1.0",
+  "description": "A left-sidebar live console for DeepSeek Harness: persona script, per-stream log, Bilibili danmaku, edge-tts speech and a hand-picked memory inbox. Windows only.",
+  "type": "module",
+  "main": "./index.js",
+  "icon": "./icon.svg",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "lib",
+    "runtime",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "manifestVersion": 1,
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": []
+    },
+    "compatibility": {
+      "dsh": ">=0.2.1-rc.2 <0.4.0",
+      "node": ">=20",
+      "profiles": [
+        "desktop",
+        "web"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "os": [
+    "win32"
+  ],
+  "scripts": {
+    "check": "node --check index.js && node --check client.js",
+    "test": "node --test test/store.test.mjs && node test/apply.test.mjs"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "cordis-plugin",
+    "bilibili",
+    "live",
+    "persona",
+    "edge-tts",
+    "vtuber"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lh1314-China/dsh-whale-live.git"
+  },
+  "homepage": "https://github.com/Lh1314-China/dsh-whale-live#readme",
+  "bugs": {
+    "url": "https://github.com/Lh1314-China/dsh-whale-live/issues"
+  },
+  "author": "Lh1314-China",
+  "license": "MIT"
+}
