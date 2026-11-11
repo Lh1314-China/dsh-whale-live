@@ -74,6 +74,21 @@ The model acts **through** these tools; the plugin never writes to DSH long-term
 - **Bilibili**: uses the unofficial `ajax/msg` endpoint; it can change or rate-limit, and some rooms return empty. Read-only — the plugin never sends danmaku.
 - **VTube Studio**: optional. Without a mouth driver directory the plugin degrades to plain audio playback.
 
+## Compatibility range (explicit)
+
+| Axis | Declared | Notes |
+| --- | --- | --- |
+| OS | `win32` only | `os: ["win32"]`; MCI playback and the app launch helpers are Windows APIs |
+| DSH | `>=0.2.1-rc.2 <0.4.0` | Verified on `0.2.2-rc.1` (desktop profile) |
+| Node | `>=20` | Uses global `fetch`, ESM top-level await |
+| Python | 3.10+ with `edge-tts` | Required only for speech; omit `pythonPath` to run silent |
+| Bilibili | cookie JSON | Uses the unofficial `ajax/msg` endpoint; read-only; may break or rate-limit |
+| VTube Studio | optional | Set `vtsPath` or leave it empty to launch through Steam; `vtubeDir` enables mouth sync |
+| OBS / 直播姬 | optional | Launch helpers only; the plugin never starts the stream |
+
+Anything outside these ranges is unsupported. DSH slot/service APIs are the main
+breaking risk across minor releases.
+
 ## Privacy
 
 - No telemetry; no accounts; nothing is uploaded.

@@ -1,12 +1,11 @@
 # dsh-whale-live bundle patch.
 #
-# One Host row: live sessions, the two persona documents (consciousness / diary),
-# Bilibili danmaku, edge-tts speech and the memory-candidate inbox. The Client
-# half adds the left-sidebar entry and the panel.
+# One Host row: live sessions, the persona documents, Bilibili danmaku,
+# edge-tts speech, the memory inbox, and the pre-live "set up the gear" helper.
 #
-# Defaults below are placeholders. Fill `roomId`, `credentialFile` and
-# `pythonPath` before going live. An empty `dataDir` uses
-# `~/.dsh/whale-live`; `vtubeDir` is optional (VTube Studio mouth sync).
+# Defaults are placeholders. Fill `roomId`, `credentialFile`, `pythonPath`
+# before going live. Empty paths disable that integration (VTS / OBS / 直播姬).
+# Compatibility: Windows only, DSH >=0.2.1-rc.2 <0.4.0 (tested 0.2.2-rc.1).
 - insert:
     - id: whale-live
       name: 'dsh-whale-live'
@@ -17,6 +16,11 @@
         credentialFile: ''
         pythonPath: ''
         vtubeDir: ''
+        obsPath: ''
+        livehimePath: ''
+        vtsPath: ''
+        stageWaitSec: 90
+        openRoomPage: true
         voice: zh-CN-XiaoyiNeural
         rate: '+8%'
         pitch: '+4Hz'

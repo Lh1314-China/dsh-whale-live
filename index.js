@@ -15,6 +15,8 @@ import { createStore } from './lib/store.js';
 import { createDanmaku } from './lib/bili.js';
 import { createVoice } from './lib/voice.js';
 import { createAvatar } from './lib/avatar.js';
+import { createStage } from './lib/stage.js';
+import { diagnose } from './lib/diagnostics.js';
 import { createTools } from './lib/tools.js';
 import { registerHttp } from './lib/http.js';
 
@@ -31,6 +33,11 @@ export async function apply(ctx, config = {}) {
     vtubeDir: '',
     vtsPort: 8001,
     vtsSteamApp: '1325860',
+    obsPath: '',
+    livehimePath: '',
+    vtsPath: '',
+    stageWaitSec: 90,
+    openRoomPage: true,
     voice: 'zh-CN-XiaoyiNeural',
     rate: '+8%',
     pitch: '+4Hz',
@@ -46,14 +53,15 @@ export async function apply(ctx, config = {}) {
   store.ensure();
   const danmaku = createDanmaku(settings, ctx.logger);
   const avatar = createAvatar(settings, ctx.logger);
+  const stage = createStage(settings, avatar, ctx.logger);
   const voice = createVoice(settings, store, ctx.logger, avatar);
-  const tools = createTools({ ctx, store, danmaku, voice, avatar, config: settings });
+  const tools = createTools({ ctx, store, danmaku, voice, avatar, stage, diagnose, config: settings });
 
   ctx.effect(() => {
     const disposers = [];
     try {
       for (const tool of tools) disposers.push(ctx.tools.register(tool));
-      const disposeHttp = registerHttp(ctx, { store, danmaku, voice, avatar, config: settings, logger: ctx.logger });
+      const disposeHttp = registerHttp(ctx, { store, danmaku, voice, avatar, stage, diagnose, config: settings, logger: ctx.logger });
       if (disposeHttp) disposers.push(disposeHttp);
       disposers.push(() => voice.dispose());
     } catch (error) {

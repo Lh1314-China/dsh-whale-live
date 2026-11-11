@@ -23,6 +23,12 @@ window.__ModuleLoader__.load({
         tabConsciousness: '意识',
         tabDiary: '观察日记',
         tabCandidates: '入忆候选',
+        tabPrepare: '准备',
+        prepareHint: '开播前先把设备架好：拉起 VTube Studio / OBS / 直播间页面，只准备，不推流；自检会逐项报告缺什么。',
+        stageBtn: '架好设备',
+        diagnoseBtn: '自检',
+        prepareSummary: '{ok}/{total} 通过 · {failed} 项必须修 · {warned} 项可选',
+        stageDone: '设备已拉起（没有自动推流）。',
         stateLive: '直播中',
         stateIdle: '未开播',
         stat: '说话 {says} · 弹幕 {danmaku} · 记 {notes}',
@@ -65,6 +71,12 @@ window.__ModuleLoader__.load({
         tabConsciousness: 'Consciousness',
         tabDiary: 'Field diary',
         tabCandidates: 'Memory inbox',
+        tabPrepare: 'Prepare',
+        prepareHint: 'Set the gear up before going live: VTube Studio, OBS and the room page. Preparation only — nothing starts streaming.',
+        stageBtn: 'Set up',
+        diagnoseBtn: 'Self-check',
+        prepareSummary: '{ok}/{total} passed · {failed} required · {warned} optional',
+        stageDone: 'Gear is up (streaming was not started).',
         stateLive: 'Live',
         stateIdle: 'Off air',
         stat: '{says} spoken · {danmaku} danmaku · {notes} notes',
@@ -196,6 +208,8 @@ window.__ModuleLoader__.load({
       const [draft, setDraft] = useState('');
       const [doc, setDoc] = useState({ kind: '', text: '', loading: false, error: '' });
       const [docTick, setDocTick] = useState(0);
+      const [diag, setDiag] = useState(null);
+      const [diagLoading, setDiagLoading] = useState(false);
       const alive = useRef(true);
 
       useEffect(() => {
@@ -258,6 +272,22 @@ window.__ModuleLoader__.load({
         }
       }, [flash, t]);
 
+      const loadDiag = useCallback(async () => {
+        setDiagLoading(true);
+        try {
+          const data = await getJson('/diagnose');
+          if (alive.current) setDiag(data);
+        } catch (cause) {
+          flash(`${t('actionFailed')}：${cause instanceof Error ? cause.message : String(cause)}`);
+        } finally {
+          if (alive.current) setDiagLoading(false);
+        }
+      }, [flash, t]);
+
+      useEffect(() => {
+        if (tab === 'prepare') loadDiag();
+      }, [tab, loadDiag]);
+
       const onSay = useCallback(async () => {
         const text = draft.trim();
         if (!text) return;
@@ -278,6 +308,7 @@ window.__ModuleLoader__.load({
 
       const tabs = [
         ['live', t('tabLive')],
+        ['prepare', t('tabPrepare')],
         ['consciousness', t('tabConsciousness')],
         ['diary', t('tabDiary')],
         ['candidates', t('tabCandidates')],
@@ -397,6 +428,56 @@ window.__ModuleLoader__.load({
               : h('p', { key: 'none', className: 'dshwl-muted' }, t('noEvents')),
           ]);
         }
+      } else if (tab === 'prepare') {
+        body = h('div', {}, [
+          h('p', { key: 'hint', className: 'dshwl-hint' }, t('prepareHint')),
+          h('div', { key: 'actions', className: 'dshwl-actions' }, [
+            h('button', {
+              key: 'stage',
+              type: 'button',
+              className: 'dshwl-btn primary',
+              disabled: busy !== '',
+              onClick: async () => {
+                const result = await run('stage', 'stage');
+                if (result) {
+                  flash(t('stageDone'));
+                  loadDiag();
+                }
+              },
+            }, t('stageBtn')),
+            h('button', {
+              key: 'diag',
+              type: 'button',
+              className: 'dshwl-btn',
+              disabled: diagLoading,
+              onClick: loadDiag,
+            }, diagLoading ? '…' : t('diagnoseBtn')),
+            session ? null : h('button', {
+              key: 'live',
+              type: 'button',
+              className: 'dshwl-btn',
+              disabled: busy !== '',
+              onClick: () => run('session', 'open'),
+            }, t('open')),
+          ]),
+          diag
+            ? h('p', { key: 'sum', className: 'dshwl-muted' }, fill(t('prepareSummary'), diag.summary))
+            : (diagLoading ? h('p', { key: 'load', className: 'dshwl-muted' }, t('loading')) : null),
+          diag
+            ? h('div', { key: 'list', className: 'dshwl-checks' }, diag.checks.map((item) => h('div', {
+              key: item.id,
+              className: 'dshwl-check',
+            }, [
+              h('span', {
+                key: 'mark',
+                className: `dshwl-check-mark ${item.ok ? 'ok' : item.optional ? 'warn' : 'fail'}`,
+              }, item.ok ? '✓' : item.optional ? '!' : '✗'),
+              h('span', { key: 'label', className: 'dshwl-check-label' }, item.label),
+              h('span', { key: 'detail', className: 'dshwl-check-detail' }, item.detail),
+              !item.ok && item.hint ? h('span', { key: 'hint', className: 'dshwl-check-hint' }, item.hint) : null,
+            ])))
+            : null,
+        ]);
       } else if (tab === 'candidates') {
         body = h('div', {}, [
           h('p', { key: 'note', className: 'dshwl-hint' }, t('candNote')),
@@ -517,6 +598,15 @@ window.__ModuleLoader__.load({
 .dshwl-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
 .dshwl-muted{color:var(--dsw-alias-label-secondary,#6b7280);font-size:11px;margin:4px 0}
 .dshwl-error{border:1px solid var(--dsw-alias-state-error-primary,#d33);color:var(--dsw-alias-state-error-primary,#d33);border-radius:8px;padding:7px 10px;margin:10px 0;font-size:12px;word-break:break-word}
+.dshwl-checks{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.dshwl-check{display:grid;grid-template-columns:24px 120px 1fr;gap:8px;align-items:baseline;padding:7px 10px;border:1px solid var(--dsw-alias-border-l1,#e5e7eb);border-radius:9px;background:var(--dsw-alias-bg-layer-1,#fff);font-size:12px}
+.dshwl-check-mark{font-weight:700;text-align:center}
+.dshwl-check-mark.ok{color:var(--dsw-alias-state-success-primary,#15803d)}
+.dshwl-check-mark.warn{color:var(--dsw-alias-state-warn-primary,#b45309)}
+.dshwl-check-mark.fail{color:var(--dsw-alias-state-error-primary,#d33)}
+.dshwl-check-label{font-weight:600}
+.dshwl-check-detail{color:var(--dsw-alias-label-secondary,#6b7280);word-break:break-word}
+.dshwl-check-hint{grid-column:2 / 4;color:var(--dsw-alias-state-warn-primary,#b45309);font-size:11px}
 .dshwl-foot{margin:22px 0 0;padding-top:10px;border-top:1px solid var(--dsw-alias-border-l1,#e5e7eb);color:var(--dsw-alias-label-secondary,#6b7280);font-size:11px;line-height:1.6}
 .dshwl-notice{position:sticky;bottom:0;margin-top:12px;border:1px solid var(--dsw-alias-border-l2,#d1d5db);background:var(--dsw-alias-bg-overlay,#fff);border-radius:8px;padding:7px 10px;font-size:12px;color:var(--dsw-alias-label-primary,#1f2329);box-shadow:0 2px 10px rgba(0,0,0,.06);word-break:break-word}
 `;
