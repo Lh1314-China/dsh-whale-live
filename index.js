@@ -57,13 +57,14 @@ export async function apply(ctx, config = {}) {
   const vts = createVts(settings, ctx.logger);
   const stage = createStage(settings, avatar, ctx.logger);
   const voice = createVoice(settings, store, ctx.logger, avatar);
-  const tools = createTools({ ctx, store, danmaku, voice, avatar, vts, stage, diagnose, config: settings });
+  const watchApi = {};
+  const tools = createTools({ ctx, store, danmaku, voice, avatar, vts, stage, diagnose, watchApi, config: settings });
 
   ctx.effect(() => {
     const disposers = [];
     try {
       for (const tool of tools) disposers.push(ctx.tools.register(tool));
-      const disposeHttp = registerHttp(ctx, { store, danmaku, voice, avatar, stage, diagnose, config: settings, logger: ctx.logger });
+      const disposeHttp = registerHttp(ctx, { store, danmaku, voice, avatar, stage, watchApi, diagnose, config: settings, logger: ctx.logger });
       if (disposeHttp) disposers.push(disposeHttp);
       disposers.push(() => voice.dispose());
     } catch (error) {

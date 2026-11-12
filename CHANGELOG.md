@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.3 — 2026-11-12
+
+### Added
+- **Watch toggle in the panel.** The Prepare tab now has a "Watch chat / Stop watching" button, so the host can start or stop the 4-second danmaku poll without asking the model. The toggle reads the live state from `/state` and writes through `action=watch`.
+- The watch timer is shared between the model tool and the panel, so either side can start/stop it; the model is still the one woken by `followup()`.
+
+### Notes
+- Starting watch requires an open session; it stops when the session closes or the plugin reloads.
+- Falls back to `inject` (context only) if `followup` is unavailable.
 ## 0.2.2 — 2026-11-12
 
 ### Added
