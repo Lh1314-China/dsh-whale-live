@@ -41,15 +41,15 @@ const ctx = {
 
 await apply(ctx, {
   dataDir,
-  roomId: 123456,
+  roomId: 1977904726,
   roomName: '测试房',
   pythonPath: process.execPath,
   listenWaitSec: 3,
 });
 
 assert.deepEqual(registered.sort(), ['whale_live', 'whale_say'], '两个工具都要注册');
-assert.ok(fs.existsSync(path.join(dataDir, '意识.md')), '意识.md 要种出来');
-assert.ok(fs.existsSync(path.join(dataDir, '人类观察日记.md')), '日记要种出来');
+assert.ok(!fs.existsSync(path.join(dataDir, '意识.md')), '不再种人设文件（意识.md）');
+assert.ok(!fs.existsSync(path.join(dataDir, '人类观察日记.md')), '不再种人设文件（日记）');
 assert.ok(logs.some(([level, msg]) => level === 'info' && String(msg).includes('whale-live')), '要留一行启动日志');
 
 for (const dispose of disposers) {

@@ -313,8 +313,6 @@ window.__ModuleLoader__.load({
       const tabs = [
         ['live', t('tabLive')],
         ['prepare', t('tabPrepare')],
-        ['consciousness', t('tabConsciousness')],
-        ['diary', t('tabDiary')],
         ['candidates', t('tabCandidates')],
       ];
 

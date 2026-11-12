@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 — 2026-11-12
+
+### Changed — the stream is the model itself, not a character
+- Removed the persona script files (`意识.md` / `人类观察日记.md`) and the "act as the big fat fish" brief. `open` now returns the model's own identity/boundaries and tells it to **retrieve its own memory from cortex** (`cortex_search`) before speaking.
+- The watch wake-up message also asks the model to retrieve memory first.
+- `note` only records into the current stream; long-term memory stays a deliberate `cortex_write` pick (0-3 per stream) after the stream ends.
+- The panel tabs are now Stream / Prepare / Memory inbox (the two persona-document tabs are gone).
+
+### Upgrade note
+- Existing `dataDir` persona files are no longer read or re-seeded; they can be deleted or archived by the user. Back them up first if you want them.
 ## 0.2.3 — 2026-11-12
 
 ### Added
