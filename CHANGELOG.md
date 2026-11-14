@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.1 — 2026-11-14
+
+### Fixed
+- `spawn()` failures are now handled through the asynchronous `error` event and no longer escape as a host uncaught exception (EACCES when starting an elevated livehime.exe could kill DSH).
+- livehime is now manual-start only: stage reports that it needs administrator permission and does not attempt to launch or elevate it.
+- Diagnostics and the stage result use the same manual-start wording.
+- `voice.js` mouth-reset python spawn now has an error listener.
+
+### Tests
+- Store smoke test aligned with 0.3.0 behavior: `ensure()` no longer seeds persona documents.
+
 ## 0.3.0 — 2026-11-12
 
 ### Changed — the stream is the model itself, not a character

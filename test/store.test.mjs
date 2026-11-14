@@ -12,8 +12,8 @@ const root = fs.mkdtempSync(path.join(os.tmpdir(), 'whale-live-test-'));
 const store = createStore({ dataDir: root });
 store.ensure();
 
-assert.ok(fs.existsSync(store.paths.docs.consciousness), '意识.md 应该被种出来');
-assert.ok(fs.existsSync(store.paths.docs.diary), '日记应该被种出来');
+assert.equal(fs.existsSync(store.paths.docs.consciousness), false, 'ensure 不应再自动种角色文档');
+assert.equal(fs.existsSync(store.paths.docs.diary), false, 'ensure 不应再自动种日记');
 
 // 1. 日记：同一天、同一个人，追加两笔
 store.noteDiary({ audience: '观众乙', text: '问我一顿吃几碗饭', date: '2026-11-10' });
