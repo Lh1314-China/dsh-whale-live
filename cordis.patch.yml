@@ -1,27 +1,40 @@
 # dsh-whale-live bundle patch.
 #
-# One Host row: live sessions, the persona documents, Bilibili danmaku,
-# edge-tts speech, the memory inbox, and the pre-live "set up the gear" helper.
+# 一行主机插件：直播场次、意识/观察两本人设文件、B 站弹幕、edge-tts 说话、
+# 入忆候选队列，外加给左侧栏面板用的同源 JSON API。
 #
-# Defaults are placeholders. Fill `roomId`, `credentialFile`, `pythonPath`
-# before going live. Empty paths disable that integration (VTS / OBS / 直播姬).
-# Compatibility: Windows only, DSH >=0.2.1-rc.2 <0.4.0 (tested 0.2.2-rc.1).
+# 所有路径默认留空：空 = 落到 ~/.dsh/whale-live。房号留空 = 不连任何房间。
+# 第一次用请按 README 的「首次配置」逐项填写。
 - insert:
     - id: whale-live
       name: 'dsh-whale-live'
       config:
-        roomId: 123456
+        # B 站直播间号与显示名；0 = 不连任何房间
+        roomId: 0
         roomName: ''
+        # 空 = ~/.dsh/whale-live
         dataDir: ''
+        # B 站登录凭据 JSON（你自己账号的），空 = 不连弹幕
         credentialFile: ''
+        # 跑 runtime/say.py 的 Python；空 = 用 PATH 上的 python
         pythonPath: ''
+        # 浏览器标签页桥目录（可选，空 = 不启用）
         vtubeDir: ''
+        # 皮套：VTube Studio 的插件端口与 Steam app id
+        vtsPort: 8001
+        vtsSteamApp: '1325860'
+        # 外部程序路径（可选，空 = 不自动拉起）
         obsPath: ''
         livehimePath: ''
         vtsPath: ''
         stageWaitSec: 90
         openRoomPage: true
+        # 说话：默认 edge-tts（零配置）；火山 TTS 作为可选后端，配置放在
+        #   <dataDir>/volc.json，或用环境变量 DSH_WHALE_LIVE_VOLC 指定路径。
         voice: zh-CN-XiaoyiNeural
         rate: '+8%'
         pitch: '+4Hz'
         listenWaitSec: 45
+        # 直播间人设：一段纯文本，open 时作为「你是谁」注入。
+        # 留空 = 中性说明；建议先写「名字 / 称呼 / 说话方式 / 边界」。
+        persona: ''

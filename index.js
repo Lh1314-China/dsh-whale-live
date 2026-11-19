@@ -5,7 +5,7 @@
  *   1. 管两本人设文件（意识卡、观察日记）和每场的记录；
  *   2. 听 B 站弹幕（只读）；
  *   3. 用 edge-tts 把话念出来；
- *   4. 给左侧栏面板开一个同源 JSON API，并给本鲸两个工具。
+ *   4. 给左侧栏面板开一个同源 JSON API，并给你两个工具。
  *
  * 直播那个“她”的记忆全在这里，cortex 一个字都不碰。
  */
@@ -26,7 +26,7 @@ export const inject = ['tools'];
 
 export async function apply(ctx, config = {}) {
   const settings = {
-    roomId: 123456,
+    roomId: 0,
     roomName: '',
     dataDir: path.join(os.homedir(), '.dsh', 'whale-live'),
     credentialFile: '',
@@ -43,6 +43,8 @@ export async function apply(ctx, config = {}) {
     rate: '+8%',
     pitch: '+4Hz',
     listenWaitSec: 45,
+    // 直播间人设：一段纯文本，open 时作为「你是谁」注入；留空则用中性说明
+    persona: '',
     ...config,
   };
 

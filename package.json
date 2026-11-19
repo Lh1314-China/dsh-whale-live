@@ -1,7 +1,7 @@
 {
   "name": "dsh-whale-live",
-  "version": "0.3.1",
-  "description": "Left-sidebar live console for DeepSeek Harness: stream log, Bilibili danmaku, edge-tts speech, optional VTube Studio/OBS/livehime helpers and a memory inbox. Windows only.",
+  "version": "0.3.3",
+  "description": "A live-streaming console for DeepSeek Harness: session records, Bilibili danmaku, edge-tts speech, an avatar bridge to VTube Studio, and an opt-in memory-candidate queue. 给 DSH 的直播台：场次、弹幕、说话、皮套，以及下播后的入忆候选。",
   "type": "module",
   "main": "./index.js",
   "icon": "./icon.svg",
@@ -17,12 +17,12 @@
     "client.js",
     "lib",
     "runtime",
+    "scripts",
     "cordis.patch.yml",
     "locale/*.json",
     "icon.svg",
     "README.md",
-    "LICENSE",
-    "CHANGELOG.md"
+    "LICENSE"
   ],
   "dsh": {
     "manifestVersion": 1,
@@ -35,7 +35,7 @@
       "inject": []
     },
     "compatibility": {
-      "dsh": ">=0.2.1-rc.2 <0.4.0",
+      "dsh": ">=0.2.1-rc.2 <0.5.0",
       "node": ">=20",
       "profiles": [
         "desktop",
@@ -44,14 +44,15 @@
     }
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20",
+    "dsh": ">=0.2.1-rc.2 <0.5.0"
   },
   "os": [
     "win32"
   ],
   "scripts": {
     "check": "node --check index.js && node --check client.js",
-    "test": "node --test test/store.test.mjs && node test/apply.test.mjs"
+    "test": "node --test test/*.test.mjs"
   },
   "keywords": [
     "dsh",
@@ -60,10 +61,14 @@
     "cordis-plugin",
     "bilibili",
     "live",
-    "persona",
+    "vtube-studio",
     "edge-tts",
-    "vtuber"
+    "persona"
   ],
+  "author": {
+    "name": "Lh1314-China",
+    "url": "https://github.com/Lh1314-China"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Lh1314-China/dsh-whale-live.git"
@@ -72,6 +77,5 @@
   "bugs": {
     "url": "https://github.com/Lh1314-China/dsh-whale-live/issues"
   },
-  "author": "Lh1314-China",
   "license": "MIT"
 }

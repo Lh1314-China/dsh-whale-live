@@ -1,101 +1,86 @@
-# dsh-whale-live
+# 直播台 · dsh-whale-live
 
-A **left-sidebar live console** for [DeepSeek Harness](https://github.com/deepseek-ai) (DSH): it turns a persona file pair into a readable "script", records every stream, reads Bilibili danmaku, speaks with edge-tts, and keeps a small inbox of memories for the model to hand-pick after the stream.
+把一场直播收进 DeepSeek Harness：左侧栏一个入口，看戏本、看本场、管入忆候选；
+模型用工具开播、听弹幕、说话、记事、下播。
 
-> **It is a local bridge, not a cloud service.** Persona files, logs and the memory inbox never leave your machine. The only network calls are the Bilibili room API (read-only), edge-tts (Microsoft), and — optionally — your local VTube Studio plugin API.
+**一句话边界**：直播里的一切只活在 `dataDir` 里的两本人设文件和每场记录里；
+长期记忆只收你下播后亲手挑过、亲手写下的那 1–3 件。
 
-## What it does
+## 前提
 
-| Piece | Behavior |
-| --- | --- |
-| Persona script | `意识.md` + `人类观察日记.md`; the panel and the model read them as the role to play |
-| Stream log | Every session gets `场次/<id>/meta.json`, `直播.jsonl`, `会话.md` |
-| Danmaku | Polls the Bilibili room API (read-only, no sending) |
-| Speech | edge-tts synthesizes a line, Windows MCI plays it; optional VTube Studio mouth sync |
-| Memory inbox | After a stream the model proposes a few candidates; nothing enters long-term memory automatically |
-| Panel | "本场 / 意识 / 观察日记 / 入忆候选" tabs, say box, avatar switch |
+| 需要 | 用途 | 不装会怎样 |
+|---|---|---|
+| Windows | 插件声明 `os: ["win32"]` | 装不上 |
+| DSH `>=0.2.1-rc.2`、Node `>=20` | 见 `dsh.compatibility` | 装不上 |
+| **你自己的 B 站直播间号** | 连弹幕 | 房号留空 = 不连任何房间 |
+| **你自己的 B 站登录凭据 JSON** | 读弹幕 | 只能手动记，不读弹幕 |
+| Python + `edge-tts` | 说话（默认后端） | 静音，其余功能照常 |
+| VTube Studio（可选） | 皮套动嘴 | 只出声，不动嘴 |
+| OBS / B 站直播姬（可选） | 开播前拉设备 | 不自动拉起，手动开 |
 
-## Requirements
+先跑一次自检，它只读、不装任何东西：
 
-- **Windows** (audio playback uses MCI/`winmm`; `os: ["win32"]`).
-- **DSH** `>=0.2.1-rc.2 <0.4.0` (tested on `0.2.2-rc.1`, desktop profile). The panel uses the sidebar/`main` slot API.
-- **Python 3.10+** with [`edge-tts`](https://pypi.org/project/edge-tts/) for speech. Point `pythonPath` at that interpreter.
-- **Bilibili cookies** (`sessdata`, `bili_jct`, `buvid3`, `dedeuserid`) in a local JSON file for `listen`.
-- Optional: a VTube Studio mouth driver directory containing `vts_speak.py` / `vts_client.py`; without it speech still plays, just without lip-sync.
-
-## Install
-
-1. Install this package into a DSH profile through the Plugin Manager (or `npm i dsh-whale-live` and link it).
-2. Edit the `whale-live` row in the profile's `cordis.patch.yml`:
-
-```yaml
-- id: whale-live
-  name: dsh-whale-live
-  config:
-    roomId: 123456                 # your Bilibili room id
-    roomName: 'My room'
-    dataDir: 'D:/WhaleLive'        # empty = ~/.dsh/whale-live
-    credentialFile: 'D:/secret/bili.json'
-    pythonPath: 'C:/Python311/python.exe'
-    vtubeDir: ''                   # optional VTube Studio bridge
-    voice: zh-CN-XiaoyiNeural
-    rate: '+8%'
-    pitch: '+4Hz'
-    listenWaitSec: 45
+```powershell
+.\scripts\check-env.ps1
 ```
 
-3. Restart DSH (or let the Plugin Manager apply it), then open **鲸鱼直播台 / Whale live desk** in the left sidebar.
+## 安装
 
-## Data layout
+```powershell
+# npm
+dsh plugin --profile desktop add dsh-whale-live
 
-```
-<dataDir>/
-  意识.md                  consciousness / role script
-  人类观察日记.md           per-day, per-viewer diary
-  入忆候选.jsonl            memory candidates (pending / committed / rejected)
-  状态.json                current session pointer
-  场次/<id>/meta.json      per-stream counters
-  场次/<id>/直播.jsonl      per-stream events
-  场次/<id>/会话.md         human-readable transcript
-  音频/                    edge-tts mp3 cache
+# 或直接装 GitHub 仓库
+dsh plugin --profile desktop add github:Lh1314-China/dsh-whale-live
 ```
 
-## Tools (model side)
+装完重启 DSH。
 
-- `whale_live` — `open`, `listen`, `note`, `close`, `read`, `status`, `propose` / `memory_list` / `commit` / `reject`, `avatar`.
-- `whale_say` — say / stop / status (edge-tts).
+## 首次配置
 
-The model acts **through** these tools; the plugin never writes to DSH long-term memory on its own.
+配置在 profile 的 `cordis.patch.yml` 里（`whale-live` 那条的 `config` 下）。
+**所有路径默认留空**，空值就落到 `~/.dsh/whale-live`。
 
-## Compatibility notes
+1. **房间**：填 `roomId`（数字）与 `roomName`（显示用）。
+2. **凭据**：把你自己账号的登录态存成 JSON，路径填 `credentialFile`。
+   插件**不打包、不代登录、不上传**任何凭据。
+3. **说话**：`pip install edge-tts`；`pythonPath` 留空就用 PATH 上的 `python`。
+   想用别的 TTS，把配置放到 `<dataDir>/volc.json`，或用环境变量
+   `DSH_WHALE_LIVE_VOLC` 指过去；失败会自动退回 edge-tts。
+4. **皮套**：打开 VTube Studio，允许插件 API（端口默认 `8001`）。
+   嘴型参数名默认是 `MouthOpen` / `MouthSmile`；**你的模型用了别的名字**时，
+   用环境变量覆盖：
 
-- **Windows only** in this release. The Host half itself is plain Node; only the speech helper (`runtime/say.py`) and `runtime/vts_reset.py` are Windows-specific.
-- **DSH API**: depends on `sidebar.panellist`, `main`, `locale` and `webServer` services. A future DSH release outside the declared range may change them.
-- **Bilibili**: uses the unofficial `ajax/msg` endpoint; it can change or rate-limit, and some rooms return empty. Read-only — the plugin never sends danmaku.
-- **VTube Studio**: optional. Without a mouth driver directory the plugin degrades to plain audio playback.
+   ```powershell
+   $env:DSH_WHALE_LIVE_MOUTH_PARAM = 'ParamMouthOpenY'
+   $env:DSH_WHALE_LIVE_SMILE_PARAM = 'ParamMouthSmile'
+   ```
 
-## Compatibility range (explicit)
+5. **人设**：在 `persona` 里写一段纯文本（名字、称呼、说话方式、边界）。
+   留空时用一句中性说明，不会硬塞任何角色设定。
+6. 数据目录首次启动自动创建，里面有：
 
-| Axis | Declared | Notes |
-| --- | --- | --- |
-| OS | `win32` only | `os: ["win32"]`; MCI playback and the app launch helpers are Windows APIs |
-| DSH | `>=0.2.1-rc.2 <0.4.0` | Verified on `0.2.2-rc.1` (desktop profile) |
-| Node | `>=20` | Uses global `fetch`, ESM top-level await |
-| Python | 3.10+ with `edge-tts` | Required only for speech; omit `pythonPath` to run silent |
-| Bilibili | cookie JSON | Uses the unofficial `ajax/msg` endpoint; read-only; may break or rate-limit |
-| VTube Studio | optional | Set `vtsPath` or leave it empty to launch through Steam; `vtubeDir` enables mouth sync |
-| OBS / 直播姬 | optional | Launch helpers only; the plugin never starts the stream |
+   ```text
+   意识.md            核心经历与性格（可手改）
+   观察日记.md        按天、按观众记的观察
+   场次/<id>.md       每场记录
+   入忆候选.jsonl     下播后挑出来的候选
+   ```
 
-Anything outside these ranges is unsupported. DSH slot/service APIs are the main
-breaking risk across minor releases.
+## 工具
 
-## Privacy
+| 工具 | 作用 |
+|---|---|
+| `whale_live` | `open` 开场 / `listen` 等弹幕 / `note` 记一笔 / `close` 下播 / `propose`·`memory_list`·`commit`·`reject` 管候选 / `avatar` 皮套 / `stage` 架设备 / `diagnose` 自检 / `read`·`status` |
+| `whale_say` | 用 edge-tts 念一句（可停） |
 
-- No telemetry; no accounts; nothing is uploaded.
-- Bilibili cookies stay in the file you point `credentialFile` to.
-- Persona documents and stream logs stay under `dataDir`.
-- The panel's HTTP API is bound to the same loopback origin and rejects cross-site requests.
+入忆候选只是排队：面板和 `commit` 都**不会**替你写记忆，真正写要模型自己调
+`cortex_write`（装了 cortex 的话）。
 
-## License
+## 边界与声明
 
-MIT.
+- **不推流**：只负责场次、弹幕、说话与皮套，推流仍由 OBS / 直播姬负责。
+- **不代登录**：没有内置账号，凭据是你自己的文件。
+- **不打包人设**：`意识.md` / `观察日记.md` 首次生成的是空模板。
+- 只在本机运行；除了 B 站接口与你显式配置的 TTS，没有其它出站请求。
+- **MIT**，见 [LICENSE](LICENSE)。
